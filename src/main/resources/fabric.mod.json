@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "harvest-mod",
-	"version": "1.21",
+	"version": "${version}",
 	"name": "Harvest Mod",
 	"description": "Harvest Mod is a farming mod that helps you automate your farms and harvest your crops easily!",
 	"authors": [
@@ -9,8 +9,8 @@
 		"Nullskulls"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://harvest.nullskulls.me/",
+		"sources": "https://github.com/MustafaBioS/harvest-mod/"
 	},
 	"license": "CC0-1.0",
 	"icon": "assets/harvestmod/icon.png",
