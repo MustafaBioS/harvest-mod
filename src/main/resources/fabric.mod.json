@@ -1,6 +1,6 @@
 {
 	"schemaVersion": 1,
-	"id": "harvest-mod",
+	"id": "harvestmod",
 	"version": "${version}",
 	"name": "Harvest Mod",
 	"description": "Harvest Mod is a farming mod that helps you automate your farms and harvest your crops easily!",
