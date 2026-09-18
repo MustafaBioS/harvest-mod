@@ -18,20 +18,16 @@
 		"main": [
 			"com.example.HarvestMod"
 		],
-		"client": [
-			"com.example.client.HarvestModClient"
+		"fabric-datagen": [
+			"com.example.HarvestModDataGenerator"
 		]
 	},
 	"mixins": [
-		"harvest-mod.mixins.json",
-		{
-			"config": "harvest-mod.client.mixins.json",
-			"environment": "client"
-		}
+		"harvest-mod.mixins.json"
 	],
 	"depends": {
 		"fabricloader": ">=0.19.5",
-		"minecraft": "~1.21.9",
+		"minecraft": "~1.21",
 		"java": ">=21",
 		"fabric-api": "*"
 	}
