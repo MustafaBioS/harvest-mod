@@ -13,7 +13,7 @@ public class ModBlocks {
 
     public static final Block HARVESTER_BLOCK = register(
             "harvester_block",
-            new Block(AbstractBlock.Settings.create().strength(2.0f))
+            new HarvesterBlock(AbstractBlock.Settings.create().strength(2.0f))
     );
 
     private static Block register(String name, Block block){
