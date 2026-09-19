@@ -12,6 +12,7 @@ import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -34,6 +35,20 @@ public class HarvesterBlock extends BlockWithEntity {
             return ItemActionResult.SUCCESS;
         }
         return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    }
+
+
+    @Override
+    protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        if (world.isClient) return ActionResult.SUCCESS;
+        if (!(world.getBlockEntity(pos) instanceof HarvesterBlockEntity be)) return ActionResult.PASS;
+
+        int droppedCount = Math.min(64, be.getSeedsHeld());
+
+        be.consumeSeeds(droppedCount);
+        player.getInventory().offerOrDrop(new ItemStack(Items.WHEAT_SEEDS, droppedCount));
+        return ActionResult.SUCCESS;
+
     }
 
     public static final MapCodec<HarvesterBlock> CODEC = createCodec(HarvesterBlock::new);
