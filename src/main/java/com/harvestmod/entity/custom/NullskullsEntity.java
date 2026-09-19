@@ -1,0 +1,147 @@
+package com.harvestmod.entity.custom;
+
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.CropBlock;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.mob.ZombieEntity;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.server.world.ServerWorld;
+
+public class NullskullsEntity extends ZombieEntity {
+
+    private final SimpleInventory stolenCrops = new SimpleInventory(32);
+
+    @Override
+    protected void initGoals() {
+        super.initGoals();
+
+        this.goalSelector.add(4, new Goal() {
+
+            private BlockPos cropPos;
+
+            @Override
+            public boolean canStart() {
+                if (NullskullsEntity.this.isInventoryFull()) {
+                    return false;
+                }
+
+                if (NullskullsEntity.this.getRandom().nextInt(10) != 0) {
+                    return false;
+                }
+
+                this.cropPos = findNearbyCrop();
+
+                return this.cropPos != null;
+            }
+
+            @Override
+            public void start() {
+                if (this.cropPos != null) {
+                    NullskullsEntity.this.getNavigation().startMovingTo(
+                            this.cropPos.getX() + 0.5,
+                            this.cropPos.getY(),
+                            this.cropPos.getZ() + 0.5,
+                            1.25
+                    );
+                }
+            }
+
+            @Override
+            public boolean shouldContinue() {
+                return this.cropPos != null
+                        && !NullskullsEntity.this.getNavigation().isIdle();
+            }
+
+            @Override
+            public void tick() {
+                if (this.cropPos == null) {
+                    return;
+                }
+
+                if (NullskullsEntity.this.squaredDistanceTo(
+                        this.cropPos.getX() + 0.5,
+                        this.cropPos.getY(),
+                        this.cropPos.getZ()
+                ) < 2.0) {
+                    if (NullskullsEntity.this.getWorld() instanceof ServerWorld serverWorld) {
+                        BlockState state = serverWorld.getBlockState(this.cropPos);
+
+                        for (ItemStack drop : Block.getDroppedStacks(
+                                state,
+                                serverWorld,
+                                this.cropPos,
+                                null
+                        )) {
+                            NullskullsEntity.this.stolenCrops.addStack(drop);
+                        }
+
+                        NullskullsEntity.this.getWorld().breakBlock(this.cropPos, false);
+                        this.cropPos = null;
+                    }
+                }
+            }
+
+            private BlockPos findNearbyCrop() {
+                BlockPos origin = NullskullsEntity.this.getBlockPos();
+                for (int x = -8; x <= 8; x++) {
+                    for (int y = -2; y <= 2; y++) {
+                        for (int z = -8; z <= 8; z++) {
+                            BlockPos pos = origin.add(x, y, z);
+                            BlockState state = NullskullsEntity.this.getWorld().getBlockState(pos);
+
+                            if (state.getBlock() instanceof CropBlock crop
+                                    && crop.isMature(state)) {
+                                return pos;
+                            }
+                        }
+                    }
+                }
+                return null;
+            }
+        });
+    }
+
+    private boolean isInventoryFull() {
+        for (int i = 0; i < stolenCrops.size(); i++) {
+            if (stolenCrops.getStack(i).isEmpty()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static DefaultAttributeContainer.Builder createAttributes() {
+        return ZombieEntity.createZombieAttributes()
+                .add(EntityAttributes.GENERIC_MAX_HEALTH, 25);
+    }
+
+    @Override
+    protected boolean burnsInDaylight() { return false; }
+
+    @Override
+    protected void dropLoot(DamageSource source, boolean causedByPlayer) {
+        super.dropLoot(source, causedByPlayer);
+
+        for (int i = 0; i < stolenCrops.size(); i++) {
+            ItemStack stack = stolenCrops.getStack(i);
+
+            if (!stack.isEmpty()) {
+                this.dropStack(stack.copy());
+                stolenCrops.setStack(i, ItemStack.EMPTY);
+            }
+        }
+    }
+
+    public NullskullsEntity(EntityType<? extends NullskullsEntity> entityType, World world) {
+        super(entityType, world);
+    }
+}
