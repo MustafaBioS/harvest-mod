@@ -3,6 +3,7 @@ package com.harvestmod.block;
 import com.harvestmod.HarvestMod;
 import com.harvestmod.block.entity.HarvesterBlockEntity;
 import com.harvestmod.block.entity.ModBlockEntities;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.BlockWithEntity;
@@ -45,10 +46,28 @@ public class HarvesterBlock extends BlockWithEntity {
 
         int droppedCount = Math.min(64, be.getSeedsHeld());
 
+        if (droppedCount <= 0) return ActionResult.PASS;
+
         be.consumeSeeds(droppedCount);
         player.getInventory().offerOrDrop(new ItemStack(Items.WHEAT_SEEDS, droppedCount));
         return ActionResult.SUCCESS;
 
+    }
+
+    @Override
+    protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.isOf(newState.getBlock())){
+            if (world.getBlockEntity(pos) instanceof HarvesterBlockEntity be){
+                int count = be.getSeedsHeld();
+                while (count > 0) {
+                    int toDrop = Math.min(count, Items.WHEAT_SEEDS.getMaxCount());
+                    be.consumeSeeds(toDrop);
+                    Block.dropStack(world, pos, new ItemStack(Items.WHEAT_SEEDS, toDrop));
+                    count -= toDrop;
+                }
+            }
+        }
+        super.onStateReplaced(state, world, pos, newState, moved);
     }
 
     public static final MapCodec<HarvesterBlock> CODEC = createCodec(HarvesterBlock::new);
