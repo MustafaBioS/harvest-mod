@@ -11,6 +11,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -23,9 +24,16 @@ public class HarvesterBlock extends BlockWithEntity {
     @Override
     protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (world.isClient) return ItemActionResult.SUCCESS;
-        HarvestMod.LOGGER.info("Right click at {} with {} (is_client: {})", pos, stack, world.isClient);
-        return ItemActionResult.SUCCESS;
-        //        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        if (!(world.getBlockEntity(pos) instanceof HarvesterBlockEntity be)){
+            return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        }
+        if (stack.isOf(Items.WHEAT_SEEDS)) {
+            int leftOvers = be.addSeeds(stack.getCount());
+            stack.setCount(leftOvers);
+            HarvestMod.LOGGER.info("Added {} seeds to harvester at {}", stack.getCount(), pos);
+            return ItemActionResult.SUCCESS;
+        }
+        return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     public static final MapCodec<HarvesterBlock> CODEC = createCodec(HarvesterBlock::new);
