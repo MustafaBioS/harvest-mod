@@ -1,6 +1,7 @@
 package com.harvestmod;
 
 import com.harvestmod.block.ModBlocks;
+import com.harvestmod.block.entity.ModBlockEntities;
 import com.harvestmod.entity.ModEntities;
 import com.harvestmod.entity.custom.NullskullsEntity;
 import net.fabricmc.api.ModInitializer;
