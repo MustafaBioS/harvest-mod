@@ -4,6 +4,7 @@ import com.harvestmod.block.ModBlocks;
 import com.harvestmod.block.entity.ModBlockEntities;
 import com.harvestmod.entity.ModEntities;
 import com.harvestmod.entity.custom.NullskullsEntity;
+import com.harvestmod.item.ModItems;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
@@ -25,6 +26,7 @@ public class HarvestMod implements ModInitializer {
 	public void onInitialize() {
 		ModBlocks.initialize();
 		ModBlockEntities.initialize();
+		ModItems.registerModItems();
 
 		ModEntities.registerModEntities();
 
