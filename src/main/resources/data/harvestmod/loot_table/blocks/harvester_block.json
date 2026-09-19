@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "harvest-mod:harvester_block"
+          "name": "harvestmod:harvester_block"
         }
       ],
       "conditions": [
