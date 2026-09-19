@@ -1,6 +1,5 @@
 package com.harvestmod;
 
-import com.harvestmod.entity.ModEntities;
 import net.fabricmc.api.ModInitializer;
 
 import net.minecraft.util.Identifier;
@@ -15,9 +14,11 @@ public class HarvestMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+		ModBlocks.initialize();
 
 		ModEntities.registerModEntities();
 
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(entries -> entries.add(ModBlocks.HARVESTER_BLOCK));
 	}
 
 	public static Identifier id(String path) {
