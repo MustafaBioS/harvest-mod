@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "harvest-mod:block/harvester_block" }
+  }
+}

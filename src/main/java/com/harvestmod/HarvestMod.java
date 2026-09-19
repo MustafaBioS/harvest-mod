@@ -1,19 +1,25 @@
 package com.harvestmod;
 
+import com.harvestmod.block.ModBlocks;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.item.ItemGroups;
 import net.minecraft.util.Identifier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 
 public class HarvestMod implements ModInitializer {
 	public static final String MOD_ID = "harvestmod";
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+	// public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 	@Override
 	public void onInitialize() {
+		ModBlocks.initialize();
+
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(entries -> entries.add(ModBlocks.HARVESTER_BLOCK));
 
 	}
 
