@@ -41,11 +41,16 @@ public class HarvesterBlockEntity extends BlockEntity {
 
     }
 
+    public void consumeSeeds(int seedCount){
+        seedsHeld = Math.max(seedsHeld-seedCount, 0);
+        markDirty();
+    }
+
     public int getSeedsHeld(){
         return seedsHeld;
     }
 
-    public void tick(World world, BlockPos pos, BlockState state, HarvesterBlockEntity be) {
+    public static void tick(World world, BlockPos pos, BlockState state, HarvesterBlockEntity be) {
         be.tickCount++;
         if (be.tickCount >= 100){
             be.tickCount = 0;
@@ -63,11 +68,13 @@ public class HarvesterBlockEntity extends BlockEntity {
             BlockState cropState = world.getBlockState(cropPos);
 
             if (cropState.getBlock() instanceof CropBlock crop && crop.isMature(cropState)) {
-                world.removeBlock(cropPos, false);
                 Block.dropStacks(cropState, world, cropPos);
-                if (seedsHeld > 0) {
+
+                if (be.getSeedsHeld() > 0) {
                     world.setBlockState(cropPos, crop.withAge(0), Block.NOTIFY_LISTENERS);
-                    seedsHeld--;
+                    be.consumeSeeds(1);
+                } else {
+                  world.removeBlock(cropPos, false);
                 }
                 HarvestMod.LOGGER.info("Harvested crop at {}", cropPos);
             }
