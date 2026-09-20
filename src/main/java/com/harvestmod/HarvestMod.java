@@ -47,6 +47,9 @@ public class HarvestMod implements ModInitializer {
 
 		CompostingChanceRegistry.INSTANCE.add(ModItems.TOMATO, 0.5f);
 		CompostingChanceRegistry.INSTANCE.add(ModItems.TOMATO_SEEDS, 0.25f);
+
+		CompostingChanceRegistry.INSTANCE.add(ModItems.GARLIC, 0.5f);
+		CompostingChanceRegistry.INSTANCE.add(ModItems.GARLIC_SPROUT, 0.25f);
 	}
 
 

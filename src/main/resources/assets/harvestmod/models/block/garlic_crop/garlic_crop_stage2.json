@@ -1,0 +1,4 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": { "cross": "harvestmod:item/garlic/garlic_stage2" }
+}

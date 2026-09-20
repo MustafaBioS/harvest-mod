@@ -7,12 +7,14 @@
   "block.harvestmod.harvester_block": "Harvester Block",
   "block.harvestmod.planter_block": "Planter Block",
 
-  "item.harvestmod.tomato_seeds": "Tomato Seeds",
   "item.harvestmod.tomato": "Tomato",
+  "item.harvestmod.tomato_seeds": "Tomato Seeds",
   "item.harvestmod.tomato_crop": "Tomato Crop",
   "item.harvestmod.tomato_soup": "Tomato Soup",
 
   "item.harvestmod.garlic": "Garlic",
+  "item.harvestmod.garlic_sprout": "Garlic Sprout",
+  "item.harvestmod.garlic_crop": "Garlic Crop",
 
   "item.harvestmod.nullskulls_spawn_egg": "Nullskulls Spawn Egg",
   "item.harvestmod.mustafa_spawn_egg": "Mustafa Spawn Egg",
@@ -26,6 +28,7 @@
   "item.harvestmod.mustafa_spawn_egg.tooltip": "Spawns a Mustafa Entity",
   "item.harvestmod.harvester_block.tooltip": "A Block That Harvests Crops Near It For You.",
   "item.harvestmod.planter_block.tooltip": "A Block That Plants Crops Near It For You.",
-  "item.harvestmod.tomato_soup.tooltip": "A Delicious Tomato Soup, Made From Freshly Harvested Tomatoes.",
-  "item.harvestmod.garlic.tooltip": "Stinky, Use To Keep Crop Thieves Away."
+  "item.harvestmod.garlic_sprout.tooltip": "TBD",
+  "item.harvestmod.garlic.tooltip": "TBD",
+  "item.harvestmod.tomato_soup.tooltip": "A Delicious Tomato Soup, Made From Freshly Harvested Tomatoes."
 }

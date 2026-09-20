@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "harvestmod:item/garlic/garlic"
+    "layer0": "harvestmod:item/garlic/garlic_sprout"
   }
 }

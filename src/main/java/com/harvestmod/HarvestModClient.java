@@ -14,5 +14,6 @@ public class HarvestModClient implements ClientModInitializer {
         EntityRendererRegistry.register(ModEntities.CROP_THIEF, CropThiefRenderer::new);
 
         BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.TOMATO_CROP, RenderLayer.getCutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.GARLIC_CROP, RenderLayer.getCutout());
     }
 }

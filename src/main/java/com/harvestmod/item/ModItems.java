@@ -24,24 +24,24 @@ import java.util.List;
 
 public class ModItems {
 
+    public static final Item TOMATO = registerItem("tomato", new Item(new Item.Settings()
+            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                    Text.translatable("item.harvestmod.tomato.tooltip")
+            )))
+            .food(
+                    new FoodComponent.Builder()
+                            .nutrition(2)
+                            .saturationModifier(0.6f)
+                            .build()
+            )
+    ));
+
     public static final Item TOMATO_SEEDS = registerItem("tomato_seeds",
             new AliasedBlockItem(ModBlocks.TOMATO_CROP, new Item.Settings().component(
                     DataComponentTypes.LORE, new LoreComponent(List.of(
                             Text.translatable("item.harvestmod.tomato_seeds.tooltip")
                     ))
             )));
-
-    public static final Item TOMATO = registerItem("tomato", new Item(new Item.Settings()
-            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
-                    Text.translatable("item.harvestmod.tomato.tooltip")
-            )))
-            .food(
-                new FoodComponent.Builder()
-                    .nutrition(2)
-                    .saturationModifier(0.6f)
-                    .build()
-            )
-    ));
 
     public static final Item TOMATO_SOUP = registerItem("tomato_soup", new Item(new Item.Settings()
             .component(DataComponentTypes.LORE, new LoreComponent(List.of(
@@ -67,6 +67,14 @@ public class ModItems {
                     .build()
             )
     ));
+
+    public static final Item GARLIC_SPROUT = registerItem("garlic_sprout",
+            new AliasedBlockItem(ModBlocks.GARLIC_CROP, new Item.Settings().component(
+                    DataComponentTypes.LORE, new LoreComponent(List.of(
+                            Text.translatable("item.harvestmod.tomato_seeds.tooltip")
+                    ))
+            )));
+
 
     public static final Item NULLSKULLS_SPAWN_EGG = registerItem("nullskulls_spawn_egg",
             new SpawnEggItem(ModEntities.CROP_THIEF, 0x36454F, 0xFFFFFF,

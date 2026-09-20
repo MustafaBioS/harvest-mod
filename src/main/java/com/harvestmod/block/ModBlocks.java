@@ -45,6 +45,10 @@ public class ModBlocks {
             new TomatoCropBlock(AbstractBlock.Settings.create().noCollision()
                     .ticksRandomly().breakInstantly().sounds(BlockSoundGroup.CROP).pistonBehavior(PistonBehavior.DESTROY).mapColor(MapColor.GREEN)));
 
+    public static final Block GARLIC_CROP = registerBlockWithoutItem("garlic_crop",
+            new TomatoCropBlock(AbstractBlock.Settings.create().noCollision()
+                    .ticksRandomly().breakInstantly().sounds(BlockSoundGroup.CROP).pistonBehavior(PistonBehavior.DESTROY).mapColor(MapColor.GREEN)));
+
     public static Block registerBlockWithoutItem(String name, Block block) {
         return Registry.register(Registries.BLOCK, Identifier.of(HarvestMod.MOD_ID, name), block);
     }

@@ -1,6 +1,6 @@
 {
   "parent": "minecraft:item/generated",
   "textures": {
-    "layer0": "harvestmod:item/tomato_seeds"
+    "layer0": "harvestmod:item/tomato/tomato_seeds"
   }
 }
