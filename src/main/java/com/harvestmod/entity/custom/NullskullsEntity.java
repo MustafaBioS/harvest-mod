@@ -17,6 +17,8 @@ import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.LocalDifficulty;
@@ -33,6 +35,21 @@ public class NullskullsEntity extends ZombieEntity {
     private static final int CROP_SEARCH_RANGE = 8;
 
     private final SimpleInventory stolenCrops = new SimpleInventory(32);
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return SoundEvents.ENTITY_CAT_AMBIENT;
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return SoundEvents.ENTITY_CAT_HURT;
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.ENTITY_CAT_DEATH;
+    }
 
     @Override
     protected void initGoals() {
