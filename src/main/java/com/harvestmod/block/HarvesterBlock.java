@@ -32,6 +32,12 @@ public class HarvesterBlock extends BlockWithEntity {
         }
 
         ItemStack oldHoe = be.getHoe();
+        if (player.isSneaking()) {
+            player.getInventory().offerOrDrop(be.getHoe());
+            be.voidHoe();
+            return ItemActionResult.SUCCESS;
+        }
+
         be.setHoe(stack);
         stack.decrement(1);
 

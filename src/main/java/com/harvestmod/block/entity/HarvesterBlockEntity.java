@@ -1,6 +1,5 @@
 package com.harvestmod.block.entity;
 
-import com.harvestmod.HarvestMod;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
@@ -20,7 +19,6 @@ import net.minecraft.world.World;
 import java.util.Map;
 
 public class HarvesterBlockEntity extends BlockEntity {
-    private int tickCount = 0;
     private Item heldHoe = null;
     private int swingsLeft = 0;
     private int currentCooldown = 0;
@@ -74,6 +72,9 @@ public class HarvesterBlockEntity extends BlockEntity {
 
     public void consumeSwings(int swingsToConsume) {
         swingsLeft = Math.max(0, swingsLeft - swingsToConsume);
+        if (swingsLeft == 0) {
+            voidHoe();
+        }
         markDirty();
     }
 
@@ -115,11 +116,6 @@ public class HarvesterBlockEntity extends BlockEntity {
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, HarvesterBlockEntity be) {
-        be.tickCount++;
-        if (be.tickCount >= 100){
-            be.tickCount = 0;
-            HarvestMod.LOGGER.info("Harvester ticking at {} (is_client: {})", pos, world.isClient);
-        }
 
         if (be.currentCooldown > 0) {
             be.currentCooldown--;
@@ -154,9 +150,19 @@ public class HarvesterBlockEntity extends BlockEntity {
                             0.0
                     );
 
-                be.consumeSwings(1);
-                HarvestMod.LOGGER.info("Harvested crop at {}", cropPos);
                 be.currentCooldown = HOE_COOLDOWNS.getOrDefault(be.heldHoe, 20);
+                be.consumeSwings(1);
+
+                if (!be.hasHoe() && world instanceof ServerWorld serverWorld) {
+                    serverWorld.spawnParticles(
+                            ParticleTypes.ITEM_SLIME,
+                            pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                            20,
+                            0.3, 0.3, 0.3,
+                            0.05
+                    );
+                }
+
                 break;
             }
         }
