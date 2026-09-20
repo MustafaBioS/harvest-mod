@@ -1,8 +1,8 @@
 package com.harvestmod.block;
 
-import com.harvestmod.HarvestMod;
 import com.harvestmod.block.entity.HarvesterBlockEntity;
 import com.harvestmod.block.entity.ModBlockEntities;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
@@ -12,59 +12,60 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import com.mojang.serialization.MapCodec;
 
 public class HarvesterBlock extends BlockWithEntity {
 
     @Override
     protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (world.isClient) return ItemActionResult.SUCCESS;
-        if (!(world.getBlockEntity(pos) instanceof HarvesterBlockEntity be)){
+        if (!(world.getBlockEntity(pos) instanceof HarvesterBlockEntity be)) {
             return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (stack.isOf(Items.WHEAT_SEEDS)) {
-            int leftOvers = be.addSeeds(stack.getCount());
-            stack.setCount(leftOvers);
-            HarvestMod.LOGGER.info("Added {} seeds to harvester at {}", stack.getCount(), pos);
-            return ItemActionResult.SUCCESS;
+        if (!HarvesterBlockEntity.isValidHoe(stack)) {
+            return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+        ItemStack oldHoe = be.getHoe();
+        be.setHoe(stack);
+        stack.decrement(1);
+
+        if(!oldHoe.isEmpty()) {
+            player.getInventory().offerOrDrop(oldHoe);
+        }
+
+        return ItemActionResult.SUCCESS;
+
     }
 
 
     @Override
     protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+
         if (world.isClient) return ActionResult.SUCCESS;
         if (!(world.getBlockEntity(pos) instanceof HarvesterBlockEntity be)) return ActionResult.PASS;
+        if (!be.hasHoe()) return ActionResult.PASS;
 
-        int droppedCount = Math.min(64, be.getSeedsHeld());
+        ItemStack storedHoe = be.getHoe();
 
-        if (droppedCount <= 0) return ActionResult.PASS;
+        if (storedHoe.isEmpty()) return ActionResult.PASS;
+        player.getInventory().offerOrDrop(storedHoe);
+        be.voidHoe();
 
-        be.consumeSeeds(droppedCount);
-        player.getInventory().offerOrDrop(new ItemStack(Items.WHEAT_SEEDS, droppedCount));
         return ActionResult.SUCCESS;
 
     }
 
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.isOf(newState.getBlock())){
-            if (world.getBlockEntity(pos) instanceof HarvesterBlockEntity be){
-                int count = be.getSeedsHeld();
-                while (count > 0) {
-                    int toDrop = Math.min(count, Items.WHEAT_SEEDS.getMaxCount());
-                    be.consumeSeeds(toDrop);
-                    Block.dropStack(world, pos, new ItemStack(Items.WHEAT_SEEDS, toDrop));
-                    count -= toDrop;
-                }
+        if (!state.isOf(newState.getBlock())) {
+            if (world.getBlockEntity(pos) instanceof HarvesterBlockEntity be && be.hasHoe()) {
+                Block.dropStack(world, pos, be.getHoe());
             }
         }
         super.onStateReplaced(state, world, pos, newState, moved);

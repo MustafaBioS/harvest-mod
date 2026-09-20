@@ -5,17 +5,36 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import java.util.Map;
+
 public class HarvesterBlockEntity extends BlockEntity {
     private int tickCount = 0;
-    private int seedsHeld = 0;
+    private Item heldHoe = null;
+    private int swingsLeft = 0;
+    private int currentCooldown = 0;
+
 
     private static final int LOOKUP_RANGE = 12;
-    private static final int MAX_SEEDS_HELD = 256;
+    private static final Map<Item, Integer> HOE_COOLDOWNS = Map.of(
+            Items.WOODEN_HOE, 20,
+            Items.STONE_HOE, 15,
+            Items.IRON_HOE, 10,
+            Items.DIAMOND_HOE, 5,
+            Items.NETHERITE_HOE, 2,
+            Items.GOLDEN_HOE, 2
+    );
+
+
 
     public HarvesterBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.HARVESTER, pos, state);
@@ -24,30 +43,62 @@ public class HarvesterBlockEntity extends BlockEntity {
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.writeNbt(nbt, registries);
-        nbt.putInt("SeedsHeld", seedsHeld);
+        nbt.putInt("swingsLeft", swingsLeft);
+        nbt.putString("heldHoe", heldHoe == null ? "" : Registries.ITEM.getId(heldHoe).toString());
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
-        seedsHeld = nbt.getInt("SeedsHeld");
+        swingsLeft = nbt.getInt("swingsLeft");
+        String temp_id = nbt.getString("heldHoe");
+        heldHoe = temp_id.isEmpty() ? null : Registries.ITEM.get(Identifier.of(temp_id));
     }
 
-    public int addSeeds(int seedCount){
-        int deltaSeeds = Math.clamp(seedsHeld+seedCount, 0, MAX_SEEDS_HELD) - seedsHeld;
-        seedsHeld += deltaSeeds;
-        markDirty();
-        return seedCount-deltaSeeds;
-
+    public int getSwingsLeft(){
+        return swingsLeft;
     }
 
-    public void consumeSeeds(int seedCount){
-        seedsHeld = Math.max(seedsHeld-seedCount, 0);
+    public void consumeSwings(int swingsToConsume) {
+        swingsLeft = Math.max(0, swingsLeft - swingsToConsume);
         markDirty();
     }
 
-    public int getSeedsHeld(){
-        return seedsHeld;
+    public void setSwing(int swingsToSet) {
+        swingsLeft = Math.max(0, swingsToSet);
+        markDirty();
+    }
+
+    public void setHoe(ItemStack stack) {
+        heldHoe = stack.getItem();
+        setSwing((stack.getMaxDamage()-stack.getDamage())*3);
+        markDirty();
+    }
+
+    public void voidHoe() {
+        heldHoe = null;
+        setSwing(0);
+        markDirty();
+    }
+
+    public ItemStack getHoe() {
+        if (heldHoe == null) return ItemStack.EMPTY;
+        ItemStack stack = new ItemStack(heldHoe);
+        int remaining = getSwingsLeft()/3;
+        stack.setDamage(stack.getMaxDamage()-remaining);
+        return stack;
+    }
+
+    public boolean canHarvest() {
+        return getSwingsLeft() > 0 && heldHoe != null;
+    }
+
+    public boolean hasHoe() {
+        return heldHoe != null;
+    }
+
+    public static boolean isValidHoe(ItemStack stack) {
+        return HOE_COOLDOWNS.containsKey(stack.getItem());
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, HarvesterBlockEntity be) {
@@ -56,6 +107,13 @@ public class HarvesterBlockEntity extends BlockEntity {
             be.tickCount = 0;
             HarvestMod.LOGGER.info("Harvester ticking at {} (is_client: {})", pos, world.isClient);
         }
+
+        if (be.currentCooldown > 0) {
+            be.currentCooldown--;
+            return;
+        }
+
+        if (!be.canHarvest()) return;
 
         Iterable<BlockPos> possibleCrops = BlockPos.iterate(
                 pos.add(-LOOKUP_RANGE, 0, -LOOKUP_RANGE),
@@ -68,15 +126,13 @@ public class HarvesterBlockEntity extends BlockEntity {
             BlockState cropState = world.getBlockState(cropPos);
 
             if (cropState.getBlock() instanceof CropBlock crop && crop.isMature(cropState)) {
-                Block.dropStacks(cropState, world, cropPos);
 
-                if (be.getSeedsHeld() > 0) {
-                    world.setBlockState(cropPos, crop.withAge(0), Block.NOTIFY_LISTENERS);
-                    be.consumeSeeds(1);
-                } else {
-                  world.removeBlock(cropPos, false);
-                }
+                Block.dropStacks(cropState, world, cropPos);
+                world.removeBlock(cropPos, false);
+                be.consumeSwings(1);
                 HarvestMod.LOGGER.info("Harvested crop at {}", cropPos);
+                be.currentCooldown = HOE_COOLDOWNS.getOrDefault(be.heldHoe, 20);
+                break;
             }
         }
     }
