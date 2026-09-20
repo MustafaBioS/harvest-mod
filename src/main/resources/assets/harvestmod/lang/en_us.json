@@ -8,6 +8,10 @@
 
   "item.harvestmod.tomato_seeds": "Tomato Seeds",
   "item.harvestmod.tomato": "Tomato",
-  "item.harvestmod.tomato_crop": "Tomato Crop"
+  "item.harvestmod.tomato_crop": "Tomato Crop",
+  "item.harvestmod.nullskulls_spawn_egg": "Nullskulls Spawn Egg",
+  "item.harvestmod.mustafa_spawn_egg": "Mustafa Spawn Egg",
+
+  "itemgroup.harvestmod.harvesting": "Harvesting"
 
 }

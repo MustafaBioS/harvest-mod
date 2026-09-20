@@ -4,6 +4,7 @@ import com.harvestmod.block.ModBlocks;
 import com.harvestmod.block.entity.ModBlockEntities;
 import com.harvestmod.entity.ModEntities;
 import com.harvestmod.entity.custom.CropThiefEntity;
+import com.harvestmod.item.ModItemGroups;
 import com.harvestmod.item.ModItems;
 import net.fabricmc.api.ModInitializer;
 
@@ -25,6 +26,9 @@ public class HarvestMod implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
+
+		ModItemGroups.registerItemGroups();
+
 		ModBlocks.initialize();
 		ModBlockEntities.initialize();
 
