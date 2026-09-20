@@ -38,7 +38,32 @@ public class ModItems {
                     .nutrition(2)
                     .saturationModifier(0.6f)
                     .build()
-            )));
+            )
+    ));
+
+    public static final Item TOMATO_SOUP = registerItem("tomato_soup", new Item(new Item.Settings()
+            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                    Text.translatable("item.harvestmod.tomato_soup.tooltip")
+            )))
+            .food(
+                new FoodComponent.Builder()
+                    .nutrition(4)
+                    .saturationModifier(0.8f)
+                    .build()
+            )
+    ));
+
+    public static final Item GARLIC = registerItem("garlic", new Item(new Item.Settings()
+            .component(DataComponentTypes.LORE, new LoreComponent(List.of(
+                    Text.translatable("item.harvestmod.garlic.tooltip")
+            )))
+            .food(
+                    new FoodComponent.Builder()
+                        .nutrition(-1)
+                        .saturationModifier(0.1f)
+                        .build()
+            )
+    ));
 
     public static final Item NULLSKULLS_SPAWN_EGG = registerItem("nullskulls_spawn_egg",
             new SpawnEggItem(ModEntities.CROP_THIEF, 0x36454F, 0xFFFFFF,

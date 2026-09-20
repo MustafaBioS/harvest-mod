@@ -42,16 +42,6 @@ public class ModBlocks {
     public static Block registerBlockWithoutItem(String name, Block block) {
         return Registry.register(Registries.BLOCK, Identifier.of(HarvestMod.MOD_ID, name), block);
     }
-//
-//    public static Block registerBlock(String name, Block block) {
-//        registerBlockItem(name, block);
-//        return Registry.register(Registries.BLOCK, Identifier.of(HarvestMod.MOD_ID, name), block);
-//    }
-//
-//    private static void registerBlockItem(String name, Block block) {
-//        Registry.register(Registries.ITEM, Identifier.of(HarvestMod.MOD_ID, name),
-//                new BlockItem(block, new Item.Settings()));
-//    }
 
     private static Block register(String name, Block block, Item.Settings itemSettings){
         Identifier id = HarvestMod.id(name);

@@ -39,7 +39,6 @@ public class HarvestMod implements ModInitializer {
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(
 				entries -> {
 					entries.add(ModBlocks.HARVESTER_BLOCK);
-					entries.add(ModBlocks.PLANTER_BLOCK);
 				}
 		);
 
