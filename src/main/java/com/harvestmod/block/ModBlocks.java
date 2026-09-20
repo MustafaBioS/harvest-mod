@@ -36,7 +36,7 @@ public class ModBlocks {
             new Item.Settings().component(
                     DataComponentTypes.LORE,
                     new LoreComponent(List.of(
-                            Text.translatable("item.harvestmod.harvester_block.tooltip")
+                            Text.translatable("item.harvestmod.planter_block.tooltip")
                     ))
             )
     );
