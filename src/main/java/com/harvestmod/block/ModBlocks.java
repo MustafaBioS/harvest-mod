@@ -32,7 +32,13 @@ public class ModBlocks {
 
     public static final Block PLANTER_BLOCK = register(
             "planter_block",
-            new PlanterBlock(AbstractBlock.Settings.create().strength(2.0f))
+            new PlanterBlock(AbstractBlock.Settings.create().strength(2.0f)),
+            new Item.Settings().component(
+                    DataComponentTypes.LORE,
+                    new LoreComponent(List.of(
+                            Text.translatable("item.harvestmod.harvester_block.tooltip")
+                    ))
+            )
     );
 
     public static final Block TOMATO_CROP = registerBlockWithoutItem("tomato_crop",
