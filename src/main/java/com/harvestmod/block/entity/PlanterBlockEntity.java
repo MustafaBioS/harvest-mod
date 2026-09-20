@@ -42,6 +42,7 @@ public class PlanterBlockEntity extends BlockEntity {
             Items.WOODEN_HOE, 200,
             Items.STONE_HOE, 800,
             Items.GOLDEN_HOE, 1600,
+            Items.IRON_HOE, 3200,
             Items.DIAMOND_HOE, 6000,
             Items.NETHERITE_HOE, 9000
     );

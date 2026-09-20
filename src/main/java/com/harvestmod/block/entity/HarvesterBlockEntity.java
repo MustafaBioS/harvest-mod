@@ -63,7 +63,11 @@ public class HarvesterBlockEntity extends BlockEntity {
         super.readNbt(nbt, registries);
         swingsLeft = nbt.getInt("swingsLeft");
         String temp_id = nbt.getString("heldHoe");
-        heldHoe = temp_id.isEmpty() ? null : Registries.ITEM.get(Identifier.of(temp_id));
+        Identifier hoeId = temp_id.isEmpty() ? null : Identifier.tryParse(temp_id);
+
+        heldHoe = hoeId == null
+                ? null
+                : Registries.ITEM.getOrEmpty(hoeId).orElse(null);
     }
 
     public int getSwingsLeft(){
@@ -132,6 +136,9 @@ public class HarvesterBlockEntity extends BlockEntity {
                 pos.add(range, yRange, range)
         );
 
+        be.currentCooldown = HOE_COOLDOWNS.getOrDefault(be.heldHoe, 20);
+
+
         for (BlockPos cropPos : possibleCrops) {
             if (!world.isChunkLoaded(cropPos)) continue;
 
@@ -149,8 +156,6 @@ public class HarvesterBlockEntity extends BlockEntity {
                             0.3, 0.3, 0.3,
                             0.0
                     );
-
-                be.currentCooldown = HOE_COOLDOWNS.getOrDefault(be.heldHoe, 20);
                 be.consumeSwings(1);
 
                 if (!be.hasHoe() && world instanceof ServerWorld serverWorld) {
