@@ -3,6 +3,7 @@ package com.harvestmod.item;
 import com.harvestmod.HarvestMod;
 import com.harvestmod.block.ModBlocks;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
@@ -14,7 +15,12 @@ public class ModItems {
 
     public static final Item TOMATO_SEEDS = registerItem("tomato_seeds",
             new AliasedBlockItem(ModBlocks.TOMATO_CROP, new Item.Settings()));
-    public static final Item TOMATO = registerItem("tomato", new Item(new Item.Settings()));
+    public static final Item TOMATO = registerItem("tomato", new Item(new Item.Settings().food(
+        new FoodComponent.Builder()
+            .nutrition(2)
+            .saturationModifier(0.6f)
+            .build()
+    )));
 
     private static Item registerItem(String name, Item item) {
         return Registry.register(Registries.ITEM, Identifier.of(HarvestMod.MOD_ID, name), item);
