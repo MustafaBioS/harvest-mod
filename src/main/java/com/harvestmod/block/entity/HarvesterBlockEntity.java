@@ -9,8 +9,10 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -129,6 +131,15 @@ public class HarvesterBlockEntity extends BlockEntity {
 
                 Block.dropStacks(cropState, world, cropPos);
                 world.removeBlock(cropPos, false);
+                if (world instanceof ServerWorld serverWorld)
+                    serverWorld.spawnParticles(
+                            ParticleTypes.HAPPY_VILLAGER,
+                            cropPos.getX() + 0.5, cropPos.getY() + 0.5, cropPos.getZ() + 0.5,
+                            6,
+                            0.3, 0.3, 0.3,
+                            0.0
+                    );
+
                 be.consumeSwings(1);
                 HarvestMod.LOGGER.info("Harvested crop at {}", cropPos);
                 be.currentCooldown = HOE_COOLDOWNS.getOrDefault(be.heldHoe, 20);
