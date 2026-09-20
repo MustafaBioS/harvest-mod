@@ -3,7 +3,6 @@ package com.harvestmod.block.entity;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.CropBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,8 +19,8 @@ import java.util.Map;
 public class PlanterBlockEntity extends BlockEntity {
 
     private int plantsBeforeRepair = 0;
-    private int currentCooldown = 100;
     private int currentMaxCooldown = 100;
+    private int currentCooldown = currentMaxCooldown;
     private int seedsHeld = 0;
     private int currentMaxSeeds = 32;
 
@@ -97,15 +96,13 @@ public class PlanterBlockEntity extends BlockEntity {
         currentCooldown = currentMaxCooldown;
     }
 
-
-
-
     private boolean canPlant() {
         return seedsHeld > 0 && plantsBeforeRepair > 0;
     }
 
     private void setPlantsBeforeRepair(int amount) {
         plantsBeforeRepair = Math.max(0, amount);
+        markDirty();
     }
 
     public boolean needsRepair() {
@@ -116,7 +113,6 @@ public class PlanterBlockEntity extends BlockEntity {
         if (stack.isEmpty()) return stack;
         if (!PLANTER_REPAIRERS.containsKey(stack.getItem())) return stack;
         if (!needsRepair()) return stack;
-
         Item item = stack.getItem();
         setPlantsBeforeRepair(PLANTER_REPAIRERS.getOrDefault(item, 0));
         stack.decrement(1);
@@ -129,10 +125,7 @@ public class PlanterBlockEntity extends BlockEntity {
 
     private void setCooldown(int amount) {
         currentMaxCooldown = Math.max(MIN_COOLDOWN, amount);
-    }
-
-    private boolean isEmeraldOre (ItemStack stack) {
-        return stack.getItem() == Items.EMERALD;
+        markDirty();
     }
 
     public ItemStack consumeOre(ItemStack stack) {
@@ -144,12 +137,41 @@ public class PlanterBlockEntity extends BlockEntity {
         return stack;
     }
 
+    private boolean isEmeraldOre (ItemStack stack) {
+        return stack.getItem() == Items.EMERALD;
+    }
+
+    private boolean canConsumeEmeraldOre(ItemStack stack) {
+        return isEmeraldOre(stack) && currentMaxSeeds < ABSOLUTE_MAX_SEEDS;
+    }
+
+    private void increaseMaxSeeds(int amount) {
+        currentMaxSeeds = Math.min(ABSOLUTE_MAX_SEEDS, currentMaxSeeds + amount);
+        markDirty();
+    }
+
     public ItemStack consumeEmeraldOre(ItemStack stack) {
         if (stack.isEmpty()) return stack;
-        if (!canConsumeOre(stack)) return stack;
-        int amount = COOLDOWN_REDUCERS.getOrDefault(stack.getItem(), 0);
+        if (!canConsumeEmeraldOre(stack)) return stack;
+        increaseMaxSeeds(20);
+        stack.decrement(1);
         return stack;
-        //TODO: continue this function
+    }
+
+    private int incrementSeedsHeld(int amount) {
+        int deltaSeeds = Math.min(currentMaxSeeds - seedsHeld, amount);
+        if (deltaSeeds <= 0) return amount;
+        seedsHeld += deltaSeeds;
+        markDirty();
+        return amount - deltaSeeds;
+    }
+
+    public ItemStack addSeeds(ItemStack stack) {
+        if (stack.isEmpty()) return stack;
+        if (stack.getItem() != Items.WHEAT_SEEDS) return stack;
+        int newSeedCount = incrementSeedsHeld(stack.getCount());
+        stack.setCount(newSeedCount);
+        return stack;
     }
 
 
@@ -159,7 +181,7 @@ public class PlanterBlockEntity extends BlockEntity {
             be.currentCooldown--;
             return;
         }
-
+        if (world.isClient) return;
         if (!be.canPlant()) return;
 
         Iterable<BlockPos> possiblePlantPos = BlockPos.iterate(
@@ -167,20 +189,19 @@ public class PlanterBlockEntity extends BlockEntity {
                 pos.add(PLANTER_RANGE, 1, PLANTER_RANGE)
         );
 
+        be.resetCooldown();
+
         for (BlockPos plantPos : possiblePlantPos) {
             if (!world.isChunkLoaded(plantPos)) continue;
             if (!world.getBlockState(plantPos).isAir()) continue;
 
-            CropBlock crop = (CropBlock) Blocks.WHEAT;
-            BlockState newCropState = crop.getDefaultState();
+            BlockState newCropState = Blocks.WHEAT.getDefaultState();
 
             if(!newCropState.canPlaceAt(world, plantPos)) continue;
 
             world.setBlockState(plantPos, newCropState, Block.NOTIFY_LISTENERS);
             be.consumeDurability(1);
             be.consumeSeeds(1);
-            be.resetCooldown();
-
             if (world instanceof ServerWorld serverWorld)
                 serverWorld.spawnParticles(
                         ParticleTypes.HAPPY_VILLAGER,
