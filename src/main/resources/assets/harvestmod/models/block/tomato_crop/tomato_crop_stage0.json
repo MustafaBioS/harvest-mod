@@ -1,4 +1,4 @@
 {
   "parent": "minecraft:block/cross",
-  "textures": { "cross": "harvestmod:item/tomato/tomato_stage0" }
+  "textures": { "cross": "harvestmod:item/tomato/tomatoes_stage0" }
 }

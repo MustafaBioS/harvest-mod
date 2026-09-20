@@ -22,11 +22,13 @@ public class ModItemGroups {
                         entries.add(ModItems.TOMATO_SOUP);
 
                         entries.add(ModItems.GARLIC);
-
-                        entries.add(ModBlocks.HARVESTER_BLOCK);
+                        entries.add(ModItems.GARLIC_SPROUT);
 
                         entries.add(ModItems.NULLSKULLS_SPAWN_EGG);
                         entries.add(ModItems.MUSTAFA_SPAWN_EGG);
+
+                        entries.add(ModBlocks.HARVESTER_BLOCK);
+                        entries.add(ModBlocks.PLANTER_BLOCK);
                     }).build());
 
     public static void registerItemGroups() {

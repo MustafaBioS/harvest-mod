@@ -6,7 +6,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "harvestmod:tomato_seeds"
+          "name": "harvestmod:garlic_sprout"
         }
       ],
       "conditions": [
@@ -20,13 +20,13 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "harvestmod:tomato"
+          "name": "harvestmod:garlic"
         }
       ],
       "conditions": [
         {
           "condition": "minecraft:block_state_property",
-          "block": "harvestmod:tomato_crop",
+          "block": "harvestmod:garlic_crop",
           "properties": {
             "age": "3"
           }
@@ -41,7 +41,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "harvestmod:tomato_seeds"
+          "name": "harvestmod:garlic_sprout"
         }
       ],
       "functions": [
@@ -57,7 +57,7 @@
       "conditions": [
         {
           "condition": "minecraft:block_state_property",
-          "block": "harvestmod:tomato_crop",
+          "block": "harvestmod:garlic_crop",
           "properties": {
             "age": "3"
           }

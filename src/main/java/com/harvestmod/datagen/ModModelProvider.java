@@ -1,5 +1,6 @@
 package com.harvestmod.datagen;
 
+import com.harvestmod.block.GarlicCropBlock;
 import com.harvestmod.block.ModBlocks;
 import com.harvestmod.block.TomatoCropBlock;
 import com.harvestmod.item.ModItems;
@@ -21,6 +22,8 @@ public class ModModelProvider extends FabricModelProvider {
     @Override
     public void generateBlockStateModels(BlockStateModelGenerator blockStateModelGenerator) {
         blockStateModelGenerator.registerCrop(ModBlocks.TOMATO_CROP, TomatoCropBlock.AGE, 0, 1, 2, 3);
+
+        blockStateModelGenerator.registerCrop(ModBlocks.GARLIC_CROP, GarlicCropBlock.AGE, 0, 1, 2, 3);
     }
 
     @Override

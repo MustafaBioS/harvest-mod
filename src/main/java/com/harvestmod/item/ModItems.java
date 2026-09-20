@@ -71,7 +71,7 @@ public class ModItems {
     public static final Item GARLIC_SPROUT = registerItem("garlic_sprout",
             new AliasedBlockItem(ModBlocks.GARLIC_CROP, new Item.Settings().component(
                     DataComponentTypes.LORE, new LoreComponent(List.of(
-                            Text.translatable("item.harvestmod.tomato_seeds.tooltip")
+                            Text.translatable("item.harvestmod.garlic_sprout.tooltip")
                     ))
             )));
 
@@ -110,10 +110,16 @@ public class ModItems {
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.NATURAL).register(entries -> {
             entries.add(TOMATO_SEEDS);
+            entries.add(GARLIC_SPROUT);
         });
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
             entries.add(TOMATO);
+            entries.add(GARLIC);
+        });
+
+        ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
+            entries.add(TOMATO_SOUP);
         });
 
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(entries -> {
