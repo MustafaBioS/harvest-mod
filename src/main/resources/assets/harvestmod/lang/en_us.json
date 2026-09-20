@@ -1,4 +1,9 @@
 {
+
   "block.harvestmod.harvester_block": "Harvester Block",
-  "item.harvestmod.tomato_seeds": "Tomato Seeds"
+
+  "item.harvestmod.tomato_seeds": "Tomato Seeds",
+  "item.harvestmod.tomato": "Tomato",
+  "item.harvestmod.tomato_crop": "Tomato Crop"
+
 }

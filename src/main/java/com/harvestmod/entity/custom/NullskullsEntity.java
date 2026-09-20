@@ -30,6 +30,7 @@ public class NullskullsEntity extends ZombieEntity {
 
     private static final TrackedData<Integer> DATA_ID_TYPE_VARIANT =
             DataTracker.registerData(NullskullsEntity.class, TrackedDataHandlerRegistry.INTEGER);
+    private static final int CROP_SEARCH_RANGE = 8;
 
     private final SimpleInventory stolenCrops = new SimpleInventory(32);
 
@@ -105,10 +106,13 @@ public class NullskullsEntity extends ZombieEntity {
 
             private BlockPos findNearbyCrop() {
                 BlockPos origin = NullskullsEntity.this.getBlockPos();
-                for (int x = -8; x <= 8; x++) {
+                for (int x = -CROP_SEARCH_RANGE; x <= CROP_SEARCH_RANGE; x++) {
                     for (int y = -2; y <= 2; y++) {
-                        for (int z = -8; z <= 8; z++) {
+                        for (int z = -CROP_SEARCH_RANGE; z <= CROP_SEARCH_RANGE; z++) {
                             BlockPos pos = origin.add(x, y, z);
+                            if (origin.getSquaredDistance(pos) > CROP_SEARCH_RANGE * CROP_SEARCH_RANGE) {
+                                continue;
+                            }
                             BlockState state = NullskullsEntity.this.getWorld().getBlockState(pos);
 
                             if (state.getBlock() instanceof CropBlock crop

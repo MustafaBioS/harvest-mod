@@ -18,7 +18,6 @@ public class ModEntities {
 
 
     public static void registerModEntities() {
-
         HarvestMod.LOGGER.info("Registering Mod Entities for " + HarvestMod.MOD_ID);
     }
 }

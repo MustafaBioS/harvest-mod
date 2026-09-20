@@ -9,6 +9,7 @@ import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.fabric.api.registry.CompostingChanceRegistry;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.util.Identifier;
 
@@ -26,6 +27,7 @@ public class HarvestMod implements ModInitializer {
 	public void onInitialize() {
 		ModBlocks.initialize();
 		ModBlockEntities.initialize();
+
 		ModItems.registerModItems();
 
 		ModEntities.registerModEntities();
@@ -34,6 +36,8 @@ public class HarvestMod implements ModInitializer {
 
 		FabricDefaultAttributeRegistry.register(NULLSKULLS, NullskullsEntity.createAttributes());
 
+		CompostingChanceRegistry.INSTANCE.add(ModItems.TOMATO, 0.5f);
+		CompostingChanceRegistry.INSTANCE.add(ModItems.TOMATO_SEEDS, 0.25f);
 	}
 
 
