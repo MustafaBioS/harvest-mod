@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#",
+    ")"
+  ],
+  "key": {
+    " # ": "harvestmod:tomato",
+    " ) ": "minecraft:bowl"
+  },
+  "result": {
+    "id": "harvestmod:tomato_soup"
+  }
+}

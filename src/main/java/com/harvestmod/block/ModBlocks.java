@@ -5,18 +5,29 @@ import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.MapColor;
 import net.minecraft.block.piston.PistonBehavior;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.Registries;
+
+import java.util.List;
 
 public class ModBlocks {
 
     public static final Block HARVESTER_BLOCK = register(
             "harvester_block",
-            new HarvesterBlock(AbstractBlock.Settings.create().strength(2.0f))
+            new HarvesterBlock(AbstractBlock.Settings.create().strength(2.0f)),
+            new Item.Settings().component(
+                    DataComponentTypes.LORE,
+                    new LoreComponent(List.of(
+                            Text.translatable("item.harvestmod.harvester_block.tooltip")
+                    ))
+            )
     );
 
     public static final Block TOMATO_CROP = registerBlockWithoutItem("tomato_crop",
@@ -26,21 +37,21 @@ public class ModBlocks {
     public static Block registerBlockWithoutItem(String name, Block block) {
         return Registry.register(Registries.BLOCK, Identifier.of(HarvestMod.MOD_ID, name), block);
     }
+//
+//    public static Block registerBlock(String name, Block block) {
+//        registerBlockItem(name, block);
+//        return Registry.register(Registries.BLOCK, Identifier.of(HarvestMod.MOD_ID, name), block);
+//    }
+//
+//    private static void registerBlockItem(String name, Block block) {
+//        Registry.register(Registries.ITEM, Identifier.of(HarvestMod.MOD_ID, name),
+//                new BlockItem(block, new Item.Settings()));
+//    }
 
-    public static Block registerBlock(String name, Block block) {
-        registerBlockItem(name, block);
-        return Registry.register(Registries.BLOCK, Identifier.of(HarvestMod.MOD_ID, name), block);
-    }
-
-    private static void registerBlockItem(String name, Block block) {
-        Registry.register(Registries.ITEM, Identifier.of(HarvestMod.MOD_ID, name),
-                new BlockItem(block, new Item.Settings()));
-    }
-
-    private static Block register(String name, Block block){
+    private static Block register(String name, Block block, Item.Settings itemSettings){
         Identifier id = HarvestMod.id(name);
         Registry.register(Registries.BLOCK, id, block);
-        Registry.register(Registries.ITEM, id, new BlockItem(block, new Item.Settings()));
+        Registry.register(Registries.ITEM, id, new BlockItem(block, itemSettings));
         return block;
     }
 
