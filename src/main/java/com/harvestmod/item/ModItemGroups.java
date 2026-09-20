@@ -19,7 +19,12 @@ public class ModItemGroups {
                     .entries((displayContext, entries) -> {
                         entries.add(ModItems.TOMATO);
                         entries.add(ModItems.TOMATO_SEEDS);
+                        entries.add(ModItems.TOMATO_SOUP);
+
+                        entries.add(ModItems.GARLIC);
+
                         entries.add(ModBlocks.HARVESTER_BLOCK);
+
                         entries.add(ModItems.NULLSKULLS_SPAWN_EGG);
                         entries.add(ModItems.MUSTAFA_SPAWN_EGG);
                     }).build());

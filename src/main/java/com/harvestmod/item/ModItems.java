@@ -8,6 +8,8 @@ import net.minecraft.component.type.FoodComponent;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroups;
@@ -58,10 +60,11 @@ public class ModItems {
                     Text.translatable("item.harvestmod.garlic.tooltip")
             )))
             .food(
-                    new FoodComponent.Builder()
-                        .nutrition(-1)
-                        .saturationModifier(0.1f)
-                        .build()
+                new FoodComponent.Builder()
+                    .nutrition(1)
+                    .statusEffect(new StatusEffectInstance(StatusEffects.HUNGER, 600, 0), 0.8F)
+                    .saturationModifier(0.1f)
+                    .build()
             )
     ));
 

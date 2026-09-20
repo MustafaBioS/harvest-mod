@@ -1,12 +1,19 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "#",
-    ")"
+    "#D",
+    ") "
   ],
   "key": {
-    " # ": "harvestmod:tomato",
-    " ) ": "minecraft:bowl"
+    "#": {
+      "item": "harvestmod:tomato"
+    },
+    "D": {
+      "item": "harvestmod:garlic"
+    },
+    ")": {
+      "item": "minecraft:bowl"
+    }
   },
   "result": {
     "id": "harvestmod:tomato_soup"
