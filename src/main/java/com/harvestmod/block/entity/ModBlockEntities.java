@@ -18,6 +18,16 @@ public class ModBlockEntities {
                     ).build()
             );
 
+    public static final BlockEntityType<PlanterBlockEntity> PLANTER =
+            Registry.register(
+                    Registries.BLOCK_ENTITY_TYPE,
+                    HarvestMod.id("planter"),
+                    BlockEntityType.Builder.create(
+                            PlanterBlockEntity::new,
+                            ModBlocks.PLANTER_BLOCK
+                    ).build()
+            );
+
     public static void initialize(){
 
     }

@@ -36,7 +36,12 @@ public class HarvestMod implements ModInitializer {
 
 		ModEntities.registerModEntities();
 
-		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(entries -> entries.add(ModBlocks.HARVESTER_BLOCK));
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(
+				entries -> {
+					entries.add(ModBlocks.HARVESTER_BLOCK);
+					entries.add(ModBlocks.PLANTER_BLOCK);
+				}
+		);
 
 		FabricDefaultAttributeRegistry.register(CROP_THIEF, CropThiefEntity.createAttributes());
 

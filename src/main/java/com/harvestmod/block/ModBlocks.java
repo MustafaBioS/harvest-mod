@@ -19,6 +19,11 @@ public class ModBlocks {
             new HarvesterBlock(AbstractBlock.Settings.create().strength(2.0f))
     );
 
+    public static final Block PLANTER_BLOCK = register(
+            "planter_block",
+            new PlanterBlock(AbstractBlock.Settings.create().strength(2.0f))
+    );
+
     public static final Block TOMATO_CROP = registerBlockWithoutItem("tomato_crop",
             new TomatoCropBlock(AbstractBlock.Settings.create().noCollision()
                     .ticksRandomly().breakInstantly().sounds(BlockSoundGroup.CROP).pistonBehavior(PistonBehavior.DESTROY).mapColor(MapColor.GREEN)));
