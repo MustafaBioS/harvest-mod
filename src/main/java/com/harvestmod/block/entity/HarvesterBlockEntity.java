@@ -26,7 +26,6 @@ public class HarvesterBlockEntity extends BlockEntity {
     private int currentCooldown = 0;
 
 
-    private static final int LOOKUP_RANGE = 12;
     private static final Map<Item, Integer> HOE_COOLDOWNS = Map.of(
             Items.WOODEN_HOE, 20,
             Items.STONE_HOE, 15,
@@ -34,6 +33,18 @@ public class HarvesterBlockEntity extends BlockEntity {
             Items.DIAMOND_HOE, 5,
             Items.NETHERITE_HOE, 2,
             Items.GOLDEN_HOE, 2
+    );
+    private static final Map<Item, Integer> HOE_RANGES = Map.of(
+            Items.WOODEN_HOE, 4,
+            Items.STONE_HOE, 6,
+            Items.IRON_HOE, 8,
+            Items.GOLDEN_HOE, 8,
+            Items.DIAMOND_HOE, 12,
+            Items.NETHERITE_HOE, 16
+    );
+    private static final Map<Item, Integer> HOE_Y_RANGES = Map.of(
+            Items.DIAMOND_HOE, 1,
+            Items.NETHERITE_HOE, 1
     );
 
 
@@ -117,9 +128,12 @@ public class HarvesterBlockEntity extends BlockEntity {
 
         if (!be.canHarvest()) return;
 
+        int range = HOE_RANGES.getOrDefault(be.heldHoe, 4);
+        int yRange = HOE_Y_RANGES.getOrDefault(be.heldHoe, 0);
+
         Iterable<BlockPos> possibleCrops = BlockPos.iterate(
-                pos.add(-LOOKUP_RANGE, 0, -LOOKUP_RANGE),
-                pos.add(LOOKUP_RANGE, 0, LOOKUP_RANGE)
+                pos.add(-range, -yRange, -range),
+                pos.add(range, yRange, range)
         );
 
         for (BlockPos cropPos : possibleCrops) {
@@ -147,5 +161,4 @@ public class HarvesterBlockEntity extends BlockEntity {
             }
         }
     }
-
 }
