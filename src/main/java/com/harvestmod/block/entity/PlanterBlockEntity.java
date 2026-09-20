@@ -2,15 +2,18 @@ package com.harvestmod.block.entity;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.CropBlock;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -23,6 +26,8 @@ public class PlanterBlockEntity extends BlockEntity {
     private int currentCooldown = currentMaxCooldown;
     private int seedsHeld = 0;
     private int currentMaxSeeds = 32;
+    private Item seedItem = null;
+
 
     private static final int ABSOLUTE_MAX_SEEDS = 256;
     private static final int MIN_COOLDOWN = 3;
@@ -50,7 +55,7 @@ public class PlanterBlockEntity extends BlockEntity {
     public boolean canInteract (ItemStack stack) {
         Item stackItem = stack.getItem();
         if (stackItem == Items.EMERALD) return true;
-        if (stackItem == Items.WHEAT_SEEDS) return true;
+        if (getCropBlock(stack.getItem()) != null) return true;
         if (PLANTER_REPAIRERS.containsKey(stackItem)) return true;
         if (COOLDOWN_REDUCERS.containsKey(stackItem)) return true;
 
@@ -68,6 +73,7 @@ public class PlanterBlockEntity extends BlockEntity {
         nbt.putInt("seedsHeld", seedsHeld);
         nbt.putInt("currentMaxSeeds", currentMaxSeeds);
         nbt.putInt("currentMaxCooldown", currentMaxCooldown);
+        nbt.putString("seedItem", seedItem == null ? "" : Registries.ITEM.getId(seedItem).toString());
     }
 
     @Override
@@ -77,6 +83,12 @@ public class PlanterBlockEntity extends BlockEntity {
         seedsHeld = nbt.getInt("seedsHeld");
         currentMaxSeeds = nbt.getInt("currentMaxSeeds");
         currentMaxCooldown = nbt.getInt("currentMaxCooldown");
+
+        String temp_id = nbt.getString("seedItem");
+        Identifier seedId = temp_id.isEmpty() ? null : Identifier.tryParse(temp_id);
+        seedItem = seedId == null ? null : Registries.ITEM.getOrEmpty(seedId).orElse(null);
+
+        if (seedItem == null) seedsHeld = 0;
     }
 
     private void consumeDurability(int amount) {
@@ -94,11 +106,13 @@ public class PlanterBlockEntity extends BlockEntity {
 
     private void consumeSeeds(int amount) {
         seedsHeld = Math.max(0, seedsHeld - amount);
+        if (seedsHeld == 0) voidSeedItem();
         markDirty();
     }
 
     public void voidSeeds() {
         seedsHeld = 0;
+        seedItem = null;
         markDirty();
     }
 
@@ -176,9 +190,35 @@ public class PlanterBlockEntity extends BlockEntity {
         return amount - deltaSeeds;
     }
 
+    private static CropBlock getCropBlock(Item seed) {
+        if (seed instanceof BlockItem blockItem && blockItem.getBlock() instanceof CropBlock crop){
+            return crop;
+        }
+        return null;
+    }
+
+
+    private void voidSeedItem() {
+        seedItem = null;
+        markDirty();
+    }
+
+    private void setSeedItem(Item item) {
+        seedItem = item;
+        markDirty();
+    }
+
+    public Item getSeedItem() {
+        return seedItem;
+    }
+
     public ItemStack addSeeds(ItemStack stack) {
         if (stack.isEmpty()) return stack;
-        if (stack.getItem() != Items.WHEAT_SEEDS) return stack;
+        if (getCropBlock(stack.getItem()) == null) return stack;
+        if (stack.getItem() != seedItem && seedItem != null) return stack;
+
+        setSeedItem(stack.getItem());
+
         int newSeedCount = incrementSeedsHeld(stack.getCount());
         stack.setCount(newSeedCount);
         return stack;
@@ -200,12 +240,14 @@ public class PlanterBlockEntity extends BlockEntity {
         );
 
         be.resetCooldown();
+        CropBlock crop = getCropBlock(be.seedItem);
+        if (crop == null) return;
+        BlockState newCropState = crop.getDefaultState();
+
 
         for (BlockPos plantPos : possiblePlantPos) {
             if (!world.isChunkLoaded(plantPos)) continue;
             if (!world.getBlockState(plantPos).isAir()) continue;
-
-            BlockState newCropState = Blocks.WHEAT.getDefaultState();
 
             if(!newCropState.canPlaceAt(world, plantPos)) continue;
 

@@ -11,8 +11,8 @@ import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
@@ -49,12 +49,16 @@ public class PlanterBlock extends BlockWithEntity {
 
         if (seedsHeld == 0) return ActionResult.PASS;
 
-        while (seedsHeld > 0) {
-            int seedsToDrop = Math.min(seedsHeld, 64);
-            seedsHeld -= seedsToDrop;
-            player.getInventory().offerOrDrop(new ItemStack(Items.WHEAT_SEEDS, seedsToDrop));
-        }
+        Item seedItem = be.getSeedItem();
+        if (seedItem == null) return ActionResult.PASS;
         be.voidSeeds();
+
+        while (seedsHeld > 0) {
+            int seedsToDrop = Math.min(seedsHeld, seedItem.getMaxCount());
+            seedsHeld -= seedsToDrop;
+            player.getInventory().offerOrDrop(new ItemStack(seedItem, seedsToDrop));
+        }
+
 
         return ActionResult.SUCCESS;
 
@@ -63,13 +67,13 @@ public class PlanterBlock extends BlockWithEntity {
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.isOf(newState.getBlock())) {
-            if (world.getBlockEntity(pos) instanceof PlanterBlockEntity be && be.hasSeeds()) {
+            if (world.getBlockEntity(pos) instanceof PlanterBlockEntity be && be.hasSeeds() && be.getSeedItem() != null) {
                 int remainingSeeds = be.getSeedsHeld();
-                int droppedSeeds = 0;
+                Item seedItem = be.getSeedItem();
                 while (remainingSeeds > 0) {
-                    droppedSeeds = Math.min(remainingSeeds, 64);
+                    int droppedSeeds = Math.min(remainingSeeds, seedItem.getMaxCount());
                     remainingSeeds -= droppedSeeds;
-                    Block.dropStack(world, pos, new ItemStack(Items.WHEAT_SEEDS, droppedSeeds));
+                    Block.dropStack(world, pos, new ItemStack(seedItem, droppedSeeds));
                 }
             }
         }
