@@ -12,6 +12,7 @@ import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemActionResult;
@@ -27,25 +28,7 @@ public class PlanterBlock extends BlockWithEntity {
         if (!(world.getBlockEntity(pos) instanceof PlanterBlockEntity be)) {
             return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        if (!PlanterBlockEntity.isValidHoe(stack)) {
-            return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
-        }
-
-        ItemStack oldHoe = be.getHoe();
-        if (player.isSneaking()) {
-            player.getInventory().offerOrDrop(be.getHoe());
-            be.voidHoe();
-            return ItemActionResult.SUCCESS;
-        }
-
-        be.setHoe(stack);
-        stack.decrement(1);
-
-        if(!oldHoe.isEmpty()) {
-            player.getInventory().offerOrDrop(oldHoe);
-        }
-
-        return ItemActionResult.SUCCESS;
+        return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
 
     }
 
@@ -55,13 +38,15 @@ public class PlanterBlock extends BlockWithEntity {
 
         if (world.isClient) return ActionResult.SUCCESS;
         if (!(world.getBlockEntity(pos) instanceof PlanterBlockEntity be)) return ActionResult.PASS;
-        if (!be.hasHoe()) return ActionResult.PASS;
 
-        ItemStack storedHoe = be.getHoe();
+        int seedsHeld = be.getSeedsHeld();
 
-        if (storedHoe.isEmpty()) return ActionResult.PASS;
-        player.getInventory().offerOrDrop(storedHoe);
-        be.voidHoe();
+        if (seedsHeld == 0) return ActionResult.PASS;
+
+        ItemStack seedStack = Items.WHEAT_SEEDS.getDefaultStack();
+        seedStack.setCount(seedsHeld);
+        player.getInventory().offerOrDrop(seedStack);
+        be.voidSeeds();
 
         return ActionResult.SUCCESS;
 
@@ -70,8 +55,14 @@ public class PlanterBlock extends BlockWithEntity {
     @Override
     protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean moved) {
         if (!state.isOf(newState.getBlock())) {
-            if (world.getBlockEntity(pos) instanceof PlanterBlockEntity be && be.hasHoe()) {
-                Block.dropStack(world, pos, be.getHoe());
+            if (world.getBlockEntity(pos) instanceof PlanterBlockEntity be && be.hasSeeds()) {
+                int remainingSeeds = be.getSeedsHeld();
+                int droppedSeeds = 0;
+                while (remainingSeeds > 0) {
+                    droppedSeeds = Math.min(remainingSeeds, 64);
+                    remainingSeeds -= droppedSeeds;
+                    Block.dropStack(world, pos, new ItemStack(Items.WHEAT_SEEDS, droppedSeeds));
+                }
             }
         }
         super.onStateReplaced(state, world, pos, newState, moved);

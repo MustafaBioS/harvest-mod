@@ -2,6 +2,7 @@ package com.harvestmod.block.entity;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.CropBlock;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.item.Item;
@@ -9,42 +10,42 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 import java.util.Map;
 
 public class PlanterBlockEntity extends BlockEntity {
-    private Item heldHoe = null;
-    private int swingsLeft = 0;
-    private int currentCooldown = 0;
 
+    private int plantsBeforeRepair = 0;
+    private int currentCooldown = 100;
+    private int currentMaxCooldown = 100;
+    private int seedsHeld = 0;
+    private int currentMaxSeeds = 32;
 
-    private static final Map<Item, Integer> HOE_COOLDOWNS = Map.of(
-            Items.WOODEN_HOE, 20,
-            Items.STONE_HOE, 15,
-            Items.IRON_HOE, 10,
-            Items.DIAMOND_HOE, 5,
-            Items.NETHERITE_HOE, 2,
-            Items.GOLDEN_HOE, 2
-    );
-    private static final Map<Item, Integer> HOE_RANGES = Map.of(
-            Items.WOODEN_HOE, 4,
-            Items.STONE_HOE, 6,
-            Items.IRON_HOE, 8,
-            Items.GOLDEN_HOE, 8,
-            Items.DIAMOND_HOE, 12,
-            Items.NETHERITE_HOE, 16
-    );
-    private static final Map<Item, Integer> HOE_Y_RANGES = Map.of(
-            Items.DIAMOND_HOE, 1,
-            Items.NETHERITE_HOE, 1
+    private static final int ABSOLUTE_MAX_SEEDS = 256;
+    private static final int MIN_COOLDOWN = 3;
+    private static final int PLANTER_RANGE = 12;
+
+    private final static Map<Item, Integer> COOLDOWN_REDUCERS = Map.of(
+            Items.GOLD_INGOT, 5,
+            Items.GOLD_NUGGET, 1,
+            Items.GOLD_BLOCK, 15,
+            Items.IRON_BLOCK, 10,
+            Items.IRON_INGOT, 3,
+            Items.IRON_NUGGET, 0,
+            Items.DIAMOND, 15
     );
 
+    private final static Map<Item, Integer> PLANTER_REPAIRERS = Map.of(
+            Items.WOODEN_HOE, 200,
+            Items.STONE_HOE, 800,
+            Items.GOLDEN_HOE, 1600,
+            Items.DIAMOND_HOE, 6000,
+            Items.NETHERITE_HOE, 9000
+    );
 
 
     public PlanterBlockEntity(BlockPos pos, BlockState state) {
@@ -54,66 +55,103 @@ public class PlanterBlockEntity extends BlockEntity {
     @Override
     protected void writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.writeNbt(nbt, registries);
-        nbt.putInt("swingsLeft", swingsLeft);
-        nbt.putString("heldHoe", heldHoe == null ? "" : Registries.ITEM.getId(heldHoe).toString());
+        nbt.putInt("plantsBeforeRepair", plantsBeforeRepair);
+        nbt.putInt("seedsHeld", seedsHeld);
+        nbt.putInt("currentMaxSeeds", currentMaxSeeds);
+        nbt.putInt("currentMaxCooldown", currentMaxCooldown);
     }
 
     @Override
     protected void readNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registries) {
         super.readNbt(nbt, registries);
-        swingsLeft = nbt.getInt("swingsLeft");
-        String temp_id = nbt.getString("heldHoe");
-        heldHoe = temp_id.isEmpty() ? null : Registries.ITEM.get(Identifier.of(temp_id));
+        plantsBeforeRepair = nbt.getInt("plantsBeforeRepair");
+        seedsHeld = nbt.getInt("seedsHeld");
+        currentMaxSeeds = nbt.getInt("currentMaxSeeds");
+        currentMaxCooldown = nbt.getInt("currentMaxCooldown");
     }
 
-    public int getSwingsLeft(){
-        return swingsLeft;
-    }
-
-    public void consumeSwings(int swingsToConsume) {
-        swingsLeft = Math.max(0, swingsLeft - swingsToConsume);
-        if (swingsLeft == 0) {
-            voidHoe();
-        }
+    private void consumeDurability(int amount) {
+        plantsBeforeRepair = Math.max(0, plantsBeforeRepair - amount);
         markDirty();
     }
 
-    public void setSwing(int swingsToSet) {
-        swingsLeft = Math.max(0, swingsToSet);
+    public boolean hasSeeds() {
+        return seedsHeld > 0;
+    }
+
+    public int getSeedsHeld() {
+        return seedsHeld;
+    }
+
+    private void consumeSeeds(int amount) {
+        seedsHeld = Math.max(0, seedsHeld - amount);
         markDirty();
     }
 
-    public void setHoe(ItemStack stack) {
-        heldHoe = stack.getItem();
-        setSwing((stack.getMaxDamage()-stack.getDamage())*3);
+    public void voidSeeds() {
+        seedsHeld = 0;
         markDirty();
     }
 
-    public void voidHoe() {
-        heldHoe = null;
-        setSwing(0);
-        markDirty();
+    private void resetCooldown() {
+        currentCooldown = currentMaxCooldown;
     }
 
-    public ItemStack getHoe() {
-        if (heldHoe == null) return ItemStack.EMPTY;
-        ItemStack stack = new ItemStack(heldHoe);
-        int remaining = getSwingsLeft()/3;
-        stack.setDamage(stack.getMaxDamage()-remaining);
+
+
+
+    private boolean canPlant() {
+        return seedsHeld > 0 && plantsBeforeRepair > 0;
+    }
+
+    private void setPlantsBeforeRepair(int amount) {
+        plantsBeforeRepair = Math.max(0, amount);
+    }
+
+    public boolean needsRepair() {
+        return plantsBeforeRepair <= 0;
+    }
+
+    public ItemStack repairPlanter(ItemStack stack) {
+        if (stack.isEmpty()) return stack;
+        if (!PLANTER_REPAIRERS.containsKey(stack.getItem())) return stack;
+        if (!needsRepair()) return stack;
+
+        Item item = stack.getItem();
+        setPlantsBeforeRepair(PLANTER_REPAIRERS.getOrDefault(item, 0));
+        stack.decrement(1);
         return stack;
     }
 
-    public boolean canHarvest() {
-        return getSwingsLeft() > 0 && heldHoe != null;
+    private boolean canConsumeOre(ItemStack stack) {
+        return COOLDOWN_REDUCERS.containsKey(stack.getItem()) && currentMaxCooldown > MIN_COOLDOWN;
     }
 
-    public boolean hasHoe() {
-        return heldHoe != null;
+    private void setCooldown(int amount) {
+        currentMaxCooldown = Math.max(MIN_COOLDOWN, amount);
     }
 
-    public static boolean isValidHoe(ItemStack stack) {
-        return HOE_COOLDOWNS.containsKey(stack.getItem());
+    private boolean isEmeraldOre (ItemStack stack) {
+        return stack.getItem() == Items.EMERALD;
     }
+
+    public ItemStack consumeOre(ItemStack stack) {
+        if (stack.isEmpty()) return stack;
+        if (!canConsumeOre(stack)) return stack;
+        int amount = COOLDOWN_REDUCERS.getOrDefault(stack.getItem(), 0);
+        setCooldown(currentMaxCooldown - amount);
+        stack.decrement(1);
+        return stack;
+    }
+
+    public ItemStack consumeEmeraldOre(ItemStack stack) {
+        if (stack.isEmpty()) return stack;
+        if (!canConsumeOre(stack)) return stack;
+        int amount = COOLDOWN_REDUCERS.getOrDefault(stack.getItem(), 0);
+        return stack;
+        //TODO: continue this function
+    }
+
 
     public static void tick(World world, BlockPos pos, BlockState state, PlanterBlockEntity be) {
 
@@ -122,49 +160,47 @@ public class PlanterBlockEntity extends BlockEntity {
             return;
         }
 
-        if (!be.canHarvest()) return;
+        if (!be.canPlant()) return;
 
-        int range = HOE_RANGES.getOrDefault(be.heldHoe, 4);
-        int yRange = HOE_Y_RANGES.getOrDefault(be.heldHoe, 0);
-
-        Iterable<BlockPos> possibleCrops = BlockPos.iterate(
-                pos.add(-range, -yRange, -range),
-                pos.add(range, yRange, range)
+        Iterable<BlockPos> possiblePlantPos = BlockPos.iterate(
+                pos.add(-PLANTER_RANGE, 1, -PLANTER_RANGE),
+                pos.add(PLANTER_RANGE, 1, PLANTER_RANGE)
         );
 
-        for (BlockPos cropPos : possibleCrops) {
-            if (!world.isChunkLoaded(cropPos)) continue;
+        for (BlockPos plantPos : possiblePlantPos) {
+            if (!world.isChunkLoaded(plantPos)) continue;
+            if (!world.getBlockState(plantPos).isAir()) continue;
 
-            BlockState cropState = world.getBlockState(cropPos);
+            CropBlock crop = (CropBlock) Blocks.WHEAT;
+            BlockState newCropState = crop.getDefaultState();
 
-            if (cropState.getBlock() instanceof CropBlock crop && crop.isMature(cropState)) {
+            if(!newCropState.canPlaceAt(world, plantPos)) continue;
 
-                Block.dropStacks(cropState, world, cropPos);
-                world.removeBlock(cropPos, false);
-                if (world instanceof ServerWorld serverWorld)
-                    serverWorld.spawnParticles(
-                            ParticleTypes.HAPPY_VILLAGER,
-                            cropPos.getX() + 0.5, cropPos.getY() + 0.5, cropPos.getZ() + 0.5,
-                            6,
-                            0.3, 0.3, 0.3,
-                            0.0
-                    );
+            world.setBlockState(plantPos, newCropState, Block.NOTIFY_LISTENERS);
+            be.consumeDurability(1);
+            be.consumeSeeds(1);
+            be.resetCooldown();
 
-                be.currentCooldown = HOE_COOLDOWNS.getOrDefault(be.heldHoe, 20);
-                be.consumeSwings(1);
+            if (world instanceof ServerWorld serverWorld)
+                serverWorld.spawnParticles(
+                        ParticleTypes.HAPPY_VILLAGER,
+                        plantPos.getX() + 0.5, plantPos.getY() + 0.5, plantPos.getZ() + 0.5,
+                        6,
+                        0.3, 0.3, 0.3,
+                        0.0
+                );
 
-                if (!be.hasHoe() && world instanceof ServerWorld serverWorld) {
-                    serverWorld.spawnParticles(
-                            ParticleTypes.ITEM_SLIME,
-                            pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
-                            20,
-                            0.3, 0.3, 0.3,
-                            0.05
-                    );
-                }
 
-                break;
+            if (be.needsRepair() && world instanceof ServerWorld serverWorld) {
+                serverWorld.spawnParticles(
+                        ParticleTypes.ITEM_SLIME,
+                        pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5,
+                        20,
+                        0.3, 0.3, 0.3,
+                        0.05
+                );
             }
+            break;
         }
     }
 }
