@@ -1,5 +1,9 @@
 {
 
+  "entity.harvestmod.crop_thief": "Crop Thief",
+  "entity.harvestmod.crop_thief.nullskulls": "Nullskulls",
+  "entity.harvestmod.crop_thief.mustafa": "Mustafa",
+
   "block.harvestmod.harvester_block": "Harvester Block",
 
   "item.harvestmod.tomato_seeds": "Tomato Seeds",

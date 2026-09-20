@@ -21,17 +21,17 @@ import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.text.Text;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.server.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
 
-public class NullskullsEntity extends ZombieEntity {
-
+public class CropThiefEntity extends ZombieEntity {
 
     private static final TrackedData<Integer> DATA_ID_TYPE_VARIANT =
-            DataTracker.registerData(NullskullsEntity.class, TrackedDataHandlerRegistry.INTEGER);
+            DataTracker.registerData(CropThiefEntity.class, TrackedDataHandlerRegistry.INTEGER);
     private static final int CROP_SEARCH_RANGE = 8;
 
     private final SimpleInventory stolenCrops = new SimpleInventory(32);
@@ -61,11 +61,11 @@ public class NullskullsEntity extends ZombieEntity {
 
             @Override
             public boolean canStart() {
-                if (NullskullsEntity.this.isInventoryFull()) {
+                if (CropThiefEntity.this.isInventoryFull()) {
                     return false;
                 }
 
-                if (NullskullsEntity.this.getRandom().nextInt(10) != 0) {
+                if (CropThiefEntity.this.getRandom().nextInt(10) != 0) {
                     return false;
                 }
 
@@ -77,7 +77,7 @@ public class NullskullsEntity extends ZombieEntity {
             @Override
             public void start() {
                 if (this.cropPos != null) {
-                    NullskullsEntity.this.getNavigation().startMovingTo(
+                    CropThiefEntity.this.getNavigation().startMovingTo(
                             this.cropPos.getX() + 0.5,
                             this.cropPos.getY(),
                             this.cropPos.getZ() + 0.5,
@@ -89,7 +89,7 @@ public class NullskullsEntity extends ZombieEntity {
             @Override
             public boolean shouldContinue() {
                 return this.cropPos != null
-                        && !NullskullsEntity.this.getNavigation().isIdle();
+                        && !CropThiefEntity.this.getNavigation().isIdle();
             }
 
             @Override
@@ -98,12 +98,12 @@ public class NullskullsEntity extends ZombieEntity {
                     return;
                 }
 
-                if (NullskullsEntity.this.squaredDistanceTo(
+                if (CropThiefEntity.this.squaredDistanceTo(
                         this.cropPos.getX() + 0.5,
                         this.cropPos.getY(),
                         this.cropPos.getZ()
                 ) < 2.0) {
-                    if (NullskullsEntity.this.getWorld() instanceof ServerWorld serverWorld) {
+                    if (CropThiefEntity.this.getWorld() instanceof ServerWorld serverWorld) {
                         BlockState state = serverWorld.getBlockState(this.cropPos);
 
                         for (ItemStack drop : Block.getDroppedStacks(
@@ -112,17 +112,17 @@ public class NullskullsEntity extends ZombieEntity {
                                 this.cropPos,
                                 null
                         )) {
-                            NullskullsEntity.this.stolenCrops.addStack(drop);
+                            CropThiefEntity.this.stolenCrops.addStack(drop);
                         }
 
-                        NullskullsEntity.this.getWorld().breakBlock(this.cropPos, false);
+                        CropThiefEntity.this.getWorld().breakBlock(this.cropPos, false);
                         this.cropPos = null;
                     }
                 }
             }
 
             private BlockPos findNearbyCrop() {
-                BlockPos origin = NullskullsEntity.this.getBlockPos();
+                BlockPos origin = CropThiefEntity.this.getBlockPos();
                 for (int x = -CROP_SEARCH_RANGE; x <= CROP_SEARCH_RANGE; x++) {
                     for (int y = -2; y <= 2; y++) {
                         for (int z = -CROP_SEARCH_RANGE; z <= CROP_SEARCH_RANGE; z++) {
@@ -130,7 +130,7 @@ public class NullskullsEntity extends ZombieEntity {
                             if (origin.getSquaredDistance(pos) > CROP_SEARCH_RANGE * CROP_SEARCH_RANGE) {
                                 continue;
                             }
-                            BlockState state = NullskullsEntity.this.getWorld().getBlockState(pos);
+                            BlockState state = CropThiefEntity.this.getWorld().getBlockState(pos);
 
                             if (state.getBlock() instanceof CropBlock crop
                                     && crop.isMature(state)) {
@@ -176,7 +176,7 @@ public class NullskullsEntity extends ZombieEntity {
         }
     }
 
-    public NullskullsEntity(EntityType<? extends NullskullsEntity> entityType, World world) {
+    public CropThiefEntity(EntityType<? extends CropThiefEntity> entityType, World world) {
         super(entityType, world);
     }
 
@@ -187,15 +187,24 @@ public class NullskullsEntity extends ZombieEntity {
         builder.add(DATA_ID_TYPE_VARIANT, 0);
     }
 
-    public MustafaEntity getVariant() {
-        return MustafaEntity.byId(this.getTypeVariant() & 255);
+    public CropThiefVariant getVariant() {
+        return CropThiefVariant.byId(this.getTypeVariant() & 255);
+    }
+
+    @Override
+    public Text getName() {
+        if (this.hasCustomName()) {
+            return super.getName();
+        }
+
+        return Text.translatable("entity.harvestmod.crop_thief." + this.getVariant().name().toLowerCase());
     }
 
     private int getTypeVariant() {
         return this.dataTracker.get(DATA_ID_TYPE_VARIANT);
     }
 
-    private void setVariant(MustafaEntity variant) {
+    private void setVariant(CropThiefVariant variant) {
         this.dataTracker.set(DATA_ID_TYPE_VARIANT, variant.getId() & 255);
     }
 
@@ -214,7 +223,7 @@ public class NullskullsEntity extends ZombieEntity {
     @Override
     public @Nullable EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
 
-        MustafaEntity variant = Util.getRandom(MustafaEntity.values(), this.random);
+        CropThiefVariant variant = Util.getRandom(CropThiefVariant.values(), this.random);
         setVariant(variant);
 
         return super.initialize(world, difficulty, spawnReason, entityData);

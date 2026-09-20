@@ -1,8 +1,7 @@
 package com.harvestmod.entity;
 
 import com.harvestmod.HarvestMod;
-import com.harvestmod.entity.custom.NullskullsEntity;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import com.harvestmod.entity.custom.CropThiefEntity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.registry.Registries;
@@ -11,9 +10,9 @@ import net.minecraft.util.Identifier;
 
 public class ModEntities {
 
-    public static final EntityType<NullskullsEntity> NULLSKULLS = Registry.register(Registries.ENTITY_TYPE,
-            Identifier.of(HarvestMod.MOD_ID, "nullskulls"),
-            EntityType.Builder.create(NullskullsEntity::new, SpawnGroup.MONSTER)
+    public static final EntityType<CropThiefEntity> CROP_THIEF = Registry.register(Registries.ENTITY_TYPE,
+            Identifier.of(HarvestMod.MOD_ID, "crop_thief"),
+            EntityType.Builder.create(CropThiefEntity::new, SpawnGroup.MONSTER)
                     .dimensions(1f, 2.5f).build());
 
 

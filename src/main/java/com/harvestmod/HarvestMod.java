@@ -3,7 +3,7 @@ package com.harvestmod;
 import com.harvestmod.block.ModBlocks;
 import com.harvestmod.block.entity.ModBlockEntities;
 import com.harvestmod.entity.ModEntities;
-import com.harvestmod.entity.custom.NullskullsEntity;
+import com.harvestmod.entity.custom.CropThiefEntity;
 import com.harvestmod.item.ModItems;
 import net.fabricmc.api.ModInitializer;
 
@@ -16,7 +16,7 @@ import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.harvestmod.entity.ModEntities.NULLSKULLS;
+import static com.harvestmod.entity.ModEntities.CROP_THIEF;
 
 public class HarvestMod implements ModInitializer {
 	public static final String MOD_ID = "harvestmod";
@@ -34,7 +34,7 @@ public class HarvestMod implements ModInitializer {
 
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(entries -> entries.add(ModBlocks.HARVESTER_BLOCK));
 
-		FabricDefaultAttributeRegistry.register(NULLSKULLS, NullskullsEntity.createAttributes());
+		FabricDefaultAttributeRegistry.register(CROP_THIEF, CropThiefEntity.createAttributes());
 
 		CompostingChanceRegistry.INSTANCE.add(ModItems.TOMATO, 0.5f);
 		CompostingChanceRegistry.INSTANCE.add(ModItems.TOMATO_SEEDS, 0.25f);
