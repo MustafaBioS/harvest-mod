@@ -46,6 +46,15 @@ public class PlanterBlockEntity extends BlockEntity {
             Items.NETHERITE_HOE, 9000
     );
 
+    public boolean canInteract (ItemStack stack) {
+        Item stackItem = stack.getItem();
+        if (stackItem == Items.EMERALD) return true;
+        if (stackItem == Items.WHEAT_SEEDS) return true;
+        if (PLANTER_REPAIRERS.containsKey(stackItem)) return true;
+        if (COOLDOWN_REDUCERS.containsKey(stackItem)) return true;
+
+        return false;
+    }
 
     public PlanterBlockEntity(BlockPos pos, BlockState state) {
         super(ModBlockEntities.PLANTER, pos, state);

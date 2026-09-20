@@ -28,7 +28,12 @@ public class PlanterBlock extends BlockWithEntity {
         if (!(world.getBlockEntity(pos) instanceof PlanterBlockEntity be)) {
             return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
         }
-        return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (!be.canInteract(stack)) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        be.consumeEmeraldOre(stack);
+        be.consumeOre(stack);
+        be.addSeeds(stack);
+        be.repairPlanter(stack);
+        return ItemActionResult.SUCCESS;
 
     }
 
@@ -38,14 +43,17 @@ public class PlanterBlock extends BlockWithEntity {
 
         if (world.isClient) return ActionResult.SUCCESS;
         if (!(world.getBlockEntity(pos) instanceof PlanterBlockEntity be)) return ActionResult.PASS;
+        if (!player.getStackInHand(Hand.MAIN_HAND).isEmpty()) return ActionResult.PASS;
 
         int seedsHeld = be.getSeedsHeld();
 
         if (seedsHeld == 0) return ActionResult.PASS;
 
-        ItemStack seedStack = Items.WHEAT_SEEDS.getDefaultStack();
-        seedStack.setCount(seedsHeld);
-        player.getInventory().offerOrDrop(seedStack);
+        while (seedsHeld > 0) {
+            int seedsToDrop = Math.min(seedsHeld, 64);
+            seedsHeld -= seedsToDrop;
+            player.getInventory().offerOrDrop(new ItemStack(Items.WHEAT_SEEDS, seedsToDrop));
+        }
         be.voidSeeds();
 
         return ActionResult.SUCCESS;
