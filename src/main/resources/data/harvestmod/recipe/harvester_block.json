@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "IHI",
+    "IPI",
+    "III"
+  ],
+  "key": {
+    "I": {"item":  "minecraft:iron_ingot"},
+    "H": {"item":  "minecraft:iron_hoe"},
+    "P": {"item":  "minecraft:piston"}
+  },
+  "result": {"id": "harvestmod:harvester_block"}
+}
