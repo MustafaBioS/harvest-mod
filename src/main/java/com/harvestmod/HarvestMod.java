@@ -36,7 +36,7 @@ public class HarvestMod implements ModInitializer {
 
 		ModEntities.registerModEntities();
 
-		ItemGroupEvents.modifyEntriesEvent(ItemGroups.BUILDING_BLOCKS).register(
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FUNCTIONAL).register(
 				entries -> {
 					entries.add(ModBlocks.HARVESTER_BLOCK);
 					entries.add(ModBlocks.PLANTER_BLOCK);

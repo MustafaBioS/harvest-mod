@@ -68,6 +68,7 @@ public class HarvesterBlockEntity extends BlockEntity {
         heldHoe = hoeId == null
                 ? null
                 : Registries.ITEM.getOrEmpty(hoeId).orElse(null);
+        if (heldHoe == null) swingsLeft = 0;
     }
 
     public int getSwingsLeft(){

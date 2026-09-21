@@ -1,11 +1,14 @@
 package com.harvestmod.entity.custom;
 
+import com.harvestmod.item.ModItems;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CropBlock;
 import net.minecraft.entity.EntityData;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.FuzzyTargeting;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributes;
@@ -17,16 +20,20 @@ import net.minecraft.entity.mob.ZombieEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.LocalDifficulty;
 import net.minecraft.world.ServerWorldAccess;
 import net.minecraft.world.World;
 import net.minecraft.server.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
 
 public class CropThiefEntity extends ZombieEntity {
 
@@ -35,6 +42,51 @@ public class CropThiefEntity extends ZombieEntity {
     private static final int CROP_SEARCH_RANGE = 8;
 
     private final SimpleInventory stolenCrops = new SimpleInventory(32);
+    private static final int GARLIC_RANGE = 10;
+
+    private boolean isRepelled() {
+        return findNearestGarlic() != null;
+    }
+
+    private ItemEntity findNearestGarlic() {
+        ItemEntity nearest = null;
+        double best = Double.MAX_VALUE;
+        for (ItemEntity g: this.getWorld().getEntitiesByClass(
+                ItemEntity.class,
+                this.getBoundingBox().expand(GARLIC_RANGE),
+                item  -> item.getStack().isOf(ModItems.GARLIC))) {
+            double d = this.squaredDistanceTo(g);
+            if (d < best) { best = d; nearest = g; }
+        }
+        return nearest;
+    }
+
+    private class AvoidGarlicGoal extends Goal {
+        private Vec3d fleeTarget;
+
+        AvoidGarlicGoal() {
+            this.setControls(EnumSet.of(Goal.Control.MOVE));
+        }
+
+        @Override
+        public boolean canStart() {
+            ItemEntity garlic = findNearestGarlic();
+            if (garlic == null) return false;
+
+            fleeTarget = FuzzyTargeting.findFrom(CropThiefEntity.this, 16, 7, garlic.getPos());
+            return fleeTarget != null;
+        }
+
+        @Override
+        public void start() {
+            CropThiefEntity.this.getNavigation().startMovingTo(fleeTarget.x, fleeTarget.y, fleeTarget.z, 1.4);
+        }
+
+        @Override
+        public boolean shouldContinue() {
+            return CropThiefEntity.this.getNavigation().isIdle();
+        }
+    }
 
     @Override
     protected SoundEvent getAmbientSound() {
@@ -55,6 +107,7 @@ public class CropThiefEntity extends ZombieEntity {
     protected void initGoals() {
         super.initGoals();
 
+        this.goalSelector.add(3, new AvoidGarlicGoal());
         this.goalSelector.add(4, new Goal() {
 
             private BlockPos cropPos;
@@ -68,6 +121,8 @@ public class CropThiefEntity extends ZombieEntity {
                 if (CropThiefEntity.this.getRandom().nextInt(10) != 0) {
                     return false;
                 }
+
+                if (CropThiefEntity.this.isRepelled()) return false;
 
                 this.cropPos = findNearbyCrop();
 
@@ -212,12 +267,17 @@ public class CropThiefEntity extends ZombieEntity {
     public void writeCustomDataToNbt(NbtCompound nbt) {
         super.writeCustomDataToNbt(nbt);
         nbt.putInt("Variant", this.getTypeVariant());
+        nbt.put("StolenCrops", stolenCrops.toNbtList(this.getWorld().getRegistryManager()));
     }
 
     @Override
     public void readCustomDataFromNbt(NbtCompound nbt) {
         super.readCustomDataFromNbt(nbt);
         this.dataTracker.set(DATA_ID_TYPE_VARIANT, nbt.getInt("Variant"));
+        stolenCrops.readNbtList(
+                nbt.getList("StolenCrops", NbtElement.COMPOUND_TYPE),
+                this.getWorld().getRegistryManager()
+        );
     }
 
     @Override
