@@ -12,7 +12,7 @@ You can find all the items in the creative inventory under the "Harvest Mod" tab
 - **Garlic Seed** - Can be planted to grow Garlic.
 - **Mustafa Spawn Egg** - Used to spawn the Mustafa variant of the Crop Thief entity.
 - **Nullskulls Spawn Egg** - Used to spawn the Nullskulls variant of the Crop Thief entity.
-- **Harvester Block** - A block that can be used to sacrifice your hoe to automatically harvest crops.
+- **Harvester Block** - A block that can be used to sacrifice your hoe to automatically harvest crops. It can be crafted using [This Recipe]()
 - **Planter Block** - A block that can be used to sacrifice your hoe to automatically plant crops.
 
 
@@ -25,7 +25,29 @@ Tomato + Garlic + Bowl = Tomato Soup
 
 **in the following pattern:**
 
-![img.png](img.png)
+![img.png](assets/tomato_soup_recipe.png)
+
+You can also craft the "Harvester Block" using the following recipe:
+
+```
+Iron Ingot + Iron Hoe + Piston = Harvester Block
+```
+
+**in the following pattern:**
+
+![img.png](assets/planter_block_recipe.png)
+
+You can also craft the "Planter Block" using the following recipe:
+
+
+
+```
+Iron Ingot + Iron Hoe + Dispenser = Planter Block
+```
+
+**in the following pattern:**
+
+![img.png](assets/harvester_block_recipe.png)
 
 there will be more recipes soon once we make updates to this mod.
 
